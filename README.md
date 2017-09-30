@@ -1,1 +1,1 @@
-#Ethereum Conference Smart Contract
+# Ethereum Conference Smart Contract
