@@ -1,3 +1,5 @@
+pragma solidity ^0.4.4;
+
 contract Conference {
 	address public organizer;
 	mapping (address => uint) public registrantsPaid;
@@ -12,7 +14,7 @@ contract Conference {
 		quota = 500;
 		numRegistrants = 0;
 	}
-	function buyTicket() public returns (bool success) {
+	function buyTicket() public payable returns (bool success) {
 		if (numRegistrants >= quota) { return false; }
 		registrantsPaid[msg.sender] = msg.value;
 		numRegistrants++;
