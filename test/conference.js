@@ -9,6 +9,16 @@ contract('Conference', function(accounts) {
 						assert.equal(quota, 500, "Quota doesn't match!");
 					}
 				).then(function() {
+					return conference.changeQuota(300);
+				})
+				.then(function(result) {
+					console.log(result);
+					return conference.quota.call();
+				})
+				.then(function(quota) {
+					assert.equal(quota, 300, "New quota is not correct");
+				})
+				.then(function() {
 					return conference.numRegistrants.call();
 				}).then(function(num) {
 					assert.equal(num, 0, "Registrants should be zero!");
