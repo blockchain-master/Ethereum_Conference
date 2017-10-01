@@ -1,4 +1,4 @@
-contract conference {
+contract Conference {
 	address public organizer;
 	mapping (address => uint) public registrantsPaid;
 	uint public numRegistrants;
