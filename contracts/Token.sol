@@ -21,10 +21,12 @@ contract MyToken is owned {
 	string public name;
 	string public symbol;
 	uint8 public decimals;
+	uint256 public totalSupply;
 
-	event Transer(address indexed from, address indexed to, uint256 value);
+	event Transfer(address indexed from, address indexed to, uint256 value);
 
 	function MyToken( uint256 initialSupply, string tokenName, string tokenSymbol, uint8 decimalUnits, address centralMinter ) {
+		totalSupply = initialSupply;
 		balanceOf[msg.sender] = initialSupply;
 		name = tokenName;
 		symbol = tokenSymbol;
@@ -45,5 +47,12 @@ contract MyToken is owned {
 
 		/* Notify anyone listening that this transfer took place */
 		Transfer(_from, _to, _value);
+	}
+
+	function mintToken(address target, uint256 mintedAmount) onlyOwner {
+		balanceOf[target] += mintedAmount;
+		totalSupply += mintedAmount;
+		Transfer(0, owner, mintedAmount);
+		Transfer(owner, target, mintedAmount);
 	}
 }
