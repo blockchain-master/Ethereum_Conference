@@ -13,13 +13,17 @@ contract MyToken {
 		decimals = decimalUnits;
 	}
 
-	function transfer(address _to, uint256 _value) {
-		require(balanceOf[msg.sender] >= _value);
-		require(balanceOf[_to] + _value >= balanceOf[_to]);
-		balanceOf[msg.sender] -= _value;
+	/* Internal transfer, only can be called by this contract */
+	function _transfer(address _from, address _to, uint _value) internal {
+		require(_to != 0x0);
+		require(balanceOf[_from] > _value);
+		require(balanceOf[_to] + _value > balanceOf[_to]);
+		require(!frozenAccount[_from]);
+		require(!frozenAccount[_to]);
+		balanceOf[_from] -= _value;
 		balanceOf[_to] += _value;
 
 		/* Notify anyone listening that this transfer took place */
-		Transfer(msg.sender, _to, _value);
+		Transfer(_from, _to, _value);
 	}
 }
