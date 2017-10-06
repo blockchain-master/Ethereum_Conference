@@ -24,6 +24,8 @@ contract MyToken is owned {
 	string public symbol;
 	uint8 public decimals;
 	uint256 public totalSupply;
+	uint256 public sellPrice;
+	uint256 public buyPrice;
 
 	event Transfer(address indexed from, address indexed to, uint256 value);
 	event FrozenFunds(address target, bool frozen);
@@ -66,5 +68,29 @@ contract MyToken is owned {
 	function freezeAccount(address target, bool freeze) onlyOwner {
 		approvedAccount[target] = freeze;
 		FrozenFunds(target, freeze);
+	}
+
+	function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+		sellPrice = newSellPrice;
+		buyPrice = newBuyPrice;
+	}
+
+	function buy() payable returns (uint amount) {
+		amount = msg.value / buyPrice;
+		require(balanceOf[this] >= amount);
+		balanceOf[msg.sender] += amount;
+		balanceOf[this] -= amount; // subtracts amount from seller's balance
+		Transfer(this, msg.sender, amount);
+		return amount;
+	}
+
+	function sell(uint amount) returns (uint revenue) {
+		require(balanceOf[msg.sender] >= amount); // check if the sender has enough to sell
+		balanceOf[this] += amount;
+		balanceOf[msg.sender] -= amount;
+		revenue = amount * sellPrice;
+		require(msg.sender.send(revenue));
+		Transfer(msg.sender, this, amount);
+		return revenue;
 	}
 }
