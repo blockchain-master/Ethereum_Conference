@@ -18,12 +18,15 @@ contract owned {
 
 contract MyToken is owned {
 	mapping (address => uint256) public balanceOf;
+	mapping (address => bool) public approvedAccount;
+
 	string public name;
 	string public symbol;
 	uint8 public decimals;
 	uint256 public totalSupply;
 
 	event Transfer(address indexed from, address indexed to, uint256 value);
+	event FrozenFunds(address target, bool frozen);
 
 	function MyToken( uint256 initialSupply, string tokenName, string tokenSymbol, uint8 decimalUnits, address centralMinter ) {
 		totalSupply = initialSupply;
@@ -40,8 +43,8 @@ contract MyToken is owned {
 		require(_to != 0x0);
 		require(balanceOf[_from] > _value);
 		require(balanceOf[_to] + _value > balanceOf[_to]);
-		require(!frozenAccount[_from]);
-		require(!frozenAccount[_to]);
+		require(approvedAccount[_from]);
+		require(approvedAccount[_to]);
 		balanceOf[_from] -= _value;
 		balanceOf[_to] += _value;
 
@@ -49,10 +52,19 @@ contract MyToken is owned {
 		Transfer(_from, _to, _value);
 	}
 
+	function transfer(address _to, uint256 _value) {
+		require(approvedAccount[msg.sender]);
+	}
+
 	function mintToken(address target, uint256 mintedAmount) onlyOwner {
 		balanceOf[target] += mintedAmount;
 		totalSupply += mintedAmount;
 		Transfer(0, owner, mintedAmount);
 		Transfer(owner, target, mintedAmount);
+	}
+
+	function freezeAccount(address target, bool freeze) onlyOwner {
+		approvedAccount[target] = freeze;
+		FrozenFunds(target, freeze);
 	}
 }
