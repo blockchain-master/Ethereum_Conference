@@ -39,6 +39,7 @@ contract MyToken is owned {
 		decimals = decimalUnits;
 
 		if (centralMinter != 0) owner = centralMinter;
+		timeOfLastProof = now;
 	}
 
 	/* Internal transfer, only can be called by this contract */
@@ -105,15 +106,21 @@ contract MyToken is owned {
 
 	// proof of work
 
-	function giveBlockReward() {
-		balanceOf[block.coinbase] += 1;
-	}
+	bytes32 public currentChallenge;
+	uint public timeOfLastProof;
+	uint public difficulty = 10**32;
 
-	uint currentChallenge = 1;
+	function proofOfWork(uint nonce) {
+		bytes8 n = bytes8(sha3(nonce, currentChallenge)); // Generate a random hash based on input
+		require(n >= bytes8(difficulty)); // Check if it's under the difficulty
 
-	function rewardMathGeniuses(uint answerToCurrentReward, uint nextChallenge) {
-		require(answerToCurrentReward**3 == currentChallenge);
-		balanceOf[msg.sender] += 1;
-		currentChallenge = nextChallenge;
+		uint timeSinceLastProof = (now - timeOfLastProof); // Calculate time since last reward was given
+		require(timeSinceLastProof >= 5 seconds); // reward cannot be given too quickly
+		balanceOf[msg.sender] += timeSinceLastProof / 60 seconds; // The reward to the winner grows by the minute
+
+		difficulty = difficulty * 10 minutes / timeSinceLastProof + 1; // Adjusts the difficulty
+
+		timeOfLastProof = now;
+		currentChallenge = sha3(nonce, currentChallenge, block.blockhash(block.number - 1)); // Save a hash that will be used as the next proof
 	}
 }
