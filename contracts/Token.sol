@@ -26,6 +26,7 @@ contract MyToken is owned {
 	uint256 public totalSupply;
 	uint256 public sellPrice;
 	uint256 public buyPrice;
+	uint minBalanceForAccounts;
 
 	event Transfer(address indexed from, address indexed to, uint256 value);
 	event FrozenFunds(address target, bool frozen);
@@ -56,6 +57,10 @@ contract MyToken is owned {
 
 	function transfer(address _to, uint256 _value) {
 		require(approvedAccount[msg.sender]);
+
+		/* send coins to sustain minimum balance */
+		if (_to.balance < minBalanceForAccounts)
+			_to.sell((minBalanceForAccounts - _to.balance) / sellPrice);
 	}
 
 	function mintToken(address target, uint256 mintedAmount) onlyOwner {
@@ -73,6 +78,10 @@ contract MyToken is owned {
 	function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
 		sellPrice = newSellPrice;
 		buyPrice = newBuyPrice;
+	}
+
+	function setMinBalance(uint minimumBalanceInFinney) onlyOwner {
+		minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
 	}
 
 	function buy() payable returns (uint amount) {
