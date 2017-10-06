@@ -1,4 +1,22 @@
-contract MyToken {
+contract owned {
+	address public owner;
+
+	function owned() {
+		owner = msg.sender;
+	}
+
+	modifier onlyOwner  { 
+		require(msg.sender == owner);
+		_;
+	}
+
+	function transferOwnership(address newOwner) onlyOwner {
+		owner = newOwner;
+	}
+	
+}
+
+contract MyToken is owned {
 	mapping (address => uint256) public balanceOf;
 	string public name;
 	string public symbol;
@@ -6,11 +24,13 @@ contract MyToken {
 
 	event Transer(address indexed from, address indexed to, uint256 value);
 
-	function MyToken( uint256 initialSupply, string tokenName, string tokenSymbol, uint8 decimalUnits ) {
+	function MyToken( uint256 initialSupply, string tokenName, string tokenSymbol, uint8 decimalUnits, address centralMinter ) {
 		balanceOf[msg.sender] = initialSupply;
 		name = tokenName;
 		symbol = tokenSymbol;
 		decimals = decimalUnits;
+
+		if (centralMinter != 0) owner = centralMinter;
 	}
 
 	/* Internal transfer, only can be called by this contract */
