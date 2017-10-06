@@ -102,4 +102,18 @@ contract MyToken is owned {
 		Transfer(msg.sender, this, amount);
 		return revenue;
 	}
+
+	// proof of work
+
+	function giveBlockReward() {
+		balanceOf[block.coinbase] += 1;
+	}
+
+	uint currentChallenge = 1;
+
+	function rewardMathGeniuses(uint answerToCurrentReward, uint nextChallenge) {
+		require(answerToCurrentReward**3 == currentChallenge);
+		balanceOf[msg.sender] += 1;
+		currentChallenge = nextChallenge;
+	}
 }
