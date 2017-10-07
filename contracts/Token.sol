@@ -1,7 +1,9 @@
+pragma solidity ^0.4.16;
+
 contract owned {
 	address public owner;
 
-	function owned() {
+	function owned() public {
 		owner = msg.sender;
 	}
 
@@ -10,10 +12,14 @@ contract owned {
 		_;
 	}
 
-	function transferOwnership(address newOwner) onlyOwner {
+	function transferOwnership(address newOwner) onlyOwner public {
 		owner = newOwner;
 	}
 	
+}
+
+interface tokenRecipient {
+	function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public;
 }
 
 contract MyToken is owned {
@@ -22,7 +28,7 @@ contract MyToken is owned {
 
 	string public name;
 	string public symbol;
-	uint8 public decimals;
+	uint8 public decimals = 18; // 18 decimals is the strongly suggested default.
 	uint256 public totalSupply;
 	uint256 public sellPrice;
 	uint256 public buyPrice;
